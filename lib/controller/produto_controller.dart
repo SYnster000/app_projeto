@@ -4,9 +4,9 @@ import '../model/produto_model.dart';
 
 class ProdutoController extends ChangeNotifier {
   final List<Produto> _produtos = [
-    Produto(nome: 'Chaveiro', preco: 25.00),
-    Produto(nome: 'Copo', preco: 15.00),
-    Produto(nome: 'Adereços', preco: 3.25),
+    Produto(nome: 'Chaveiro', preco: 25.00, quantidade: 5),
+    Produto(nome: 'Copo', preco: 15.00, quantidade: 16),
+    Produto(nome: 'Adereços', preco: 3.25, quantidade: 27),
   ];
 
   List<Produto> get produtos => _produtos;
@@ -18,6 +18,7 @@ class ProdutoController extends ChangeNotifier {
 
   final txtNome = TextEditingController();
   final txtPreco = TextEditingController();
+  final txtQuantidade = TextEditingController();
 
   void alterarVisualizacao(valor) {
     _visualizarLista = valor;
@@ -27,8 +28,11 @@ class ProdutoController extends ChangeNotifier {
   void adicionarItem() {
     String nome = txtNome.text;
     double preco = double.tryParse(txtPreco.text) ?? 0.0;
+    int quantidade = int.tryParse(txtQuantidade.text) ?? 0;
 
-    _produtos.add(Produto(nome: nome, preco: preco));
+
+
+    _produtos.add(Produto(nome: nome, preco: preco, quantidade: quantidade));
 
     txtNome.clear();
     txtPreco.clear();
@@ -39,8 +43,9 @@ class ProdutoController extends ChangeNotifier {
   void alterarItem(index){
     String nome = txtNome.text;
     double preco = double.tryParse(txtPreco.text) ?? 0.0;
+    int quantidade = int.tryParse(txtQuantidade.text) ?? 0;
 
-    _produtos[index] = Produto(nome: nome, preco: preco);
+    _produtos[index] = Produto(nome: nome, preco: preco, quantidade: quantidade);
 
     txtNome.clear();
     txtPreco.clear();

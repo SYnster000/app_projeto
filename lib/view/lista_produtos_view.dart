@@ -48,7 +48,7 @@ class ListaProdutosView extends StatefulWidget {
             child: Card(
               child: ListTile(
                 title: Text(
-                  item.nome,
+                  '${item.nome} x${item.quantidade}',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
