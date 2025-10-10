@@ -22,20 +22,24 @@ class _MenuViewState extends State<MenuView> {
         body: Center(
             child: Container(
               width: double.infinity,
+              /*
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
+                  
                   colors: [
                     Colors.yellow.shade400,
                     Colors.teal.shade800,
                   ],
+                  
                 )
               ),
+              */
 
             child: Column(
               //mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
                   padding: EdgeInsets.all(50),
@@ -60,7 +64,8 @@ class _MenuViewState extends State<MenuView> {
                               iconSize: 100,
 
                               //tooltip: 'teste',
-                              onPressed: () {
+                              onPressed: () { 
+                                Navigator.pushNamed(context, 'lista_produtos');
                               },
                             ),
                             Text('Listar Produtos em Estoque'),

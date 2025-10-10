@@ -1,12 +1,20 @@
 import 'package:app_projeto/view/esquece_senha_view.dart';
+import 'package:app_projeto/view/lista_produtos_view.dart';
 import 'package:app_projeto/view/login_view.dart';
 import 'package:app_projeto/view/sobre_view.dart';
 import 'package:app_projeto/view/menu_view.dart';
 import 'package:app_projeto/view/cadastro_view.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'controller/produto_controller.dart';
+
+final g = GetIt.instance;
+
 
 void main() {
+  g.registerSingleton<ProdutoController>(ProdutoController());
+
   //iniciar a execução do App
   runApp(
     DevicePreview(
@@ -43,6 +51,7 @@ void main() {
           'menu':(context) => MenuView(),
           'cadastro':(context) => CadastroView(),
           'esquece_senha':(context) => EsquecesenhaView(),
+          'lista_produtos':(context) => ListaProdutosView(),
         },
       ),
     ),
