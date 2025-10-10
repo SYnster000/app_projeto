@@ -15,27 +15,16 @@ class _MenuViewState extends State<MenuView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Menu'),
+        title: Text('Menu',
+        style: TextStyle(fontSize: 24, color: Colors.white),
+        ),
+      
         centerTitle: true,
         backgroundColor: Colors.grey.shade600,
       ),
         body: Center(
             child: Container(
               width: double.infinity,
-              /*
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                  
-                  colors: [
-                    Colors.yellow.shade400,
-                    Colors.teal.shade800,
-                  ],
-                  
-                )
-              ),
-              */
 
             child: Column(
               //mainAxisAlignment: MainAxisAlignment.center,
