@@ -1,3 +1,4 @@
+import 'package:app_projeto/view/edita_produtos_view.dart';
 import 'package:app_projeto/view/esquece_senha_view.dart';
 import 'package:app_projeto/view/lista_produtos_view.dart';
 import 'package:app_projeto/view/login_view.dart';
@@ -52,6 +53,7 @@ void main() {
           'cadastro':(context) => CadastroView(),
           'esquece_senha':(context) => EsquecesenhaView(),
           'lista_produtos':(context) => ListaProdutosView(),
+          'edita_produtos':(context) => EditaProdutosView(),
         },
       ),
     ),

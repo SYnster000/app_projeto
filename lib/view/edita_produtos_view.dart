@@ -1,104 +1,131 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../controller/produto_controller.dart';
 
-
-class MenuView extends StatefulWidget {
-  const MenuView({super.key});
+class EditaProdutosView extends StatefulWidget {
+  const EditaProdutosView({super.key});
 
   @override
-  State<MenuView> createState() => _MenuViewState();
+  State<EditaProdutosView> createState() => _EditaProdutosViewState();
 }
 
-class _MenuViewState extends State<MenuView> {
+class _EditaProdutosViewState extends State<EditaProdutosView> {
   final ctrl = GetIt.I.get<ProdutoController>();
+
+@override
+  void initState() {
+    super.initState();
+    ctrl.addListener(() => setState(() {}));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Menu',
-        style: TextStyle(fontSize: 24, color: Colors.white),
+        title: Text(
+          'Editar Produtos',
+          style: TextStyle(fontSize: 24, color: Colors.white),
+          
         ),
-      
         centerTitle: true,
         backgroundColor: Colors.grey.shade600,
+
       ),
-        body: Center(
-            child: Container(
-              width: double.infinity,
+      //
+      // BODY
+      //
+      body: Padding(
+        padding: EdgeInsets.all(30),
+        child:
+        SizedBox(
+      // height: 300,
+      child: ListView.builder(
+        // scrollDirection: Axis.horizontal,
+        itemCount: ctrl.produtos.length,
+        itemBuilder: (context, index) {
+          final item = ctrl.produtos[index];
 
-            child: Column(
-              //mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(50),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                   children: [
+          return SizedBox(
+            //     width: 150,
+            child: Card(
+              child: ListTile(
+                title: Text(
+                  '${item.nome} x${item.quantidade}',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  'R\$ ${item.preco.toStringAsFixed(2)}',
+                ),
+                trailing: SizedBox(
+                  width: 80,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          ctrl.txtNome.text = ctrl.produtos[index].nome;
+                          ctrl.txtQuantidade.text = ctrl.produtos[index].quantidade
+                              .toString();
+                          ctrl.txtPreco.text = ctrl.produtos[index].preco
+                              .toString();
 
-
-                          //fonts.google.com/icons
-                          IconButton(
-                              icon: const Icon(Icons.add),
-                              iconSize: 100,
-
-                              //tooltip: 'teste',
-                              onPressed: () {
-                                caixaDialogo(-1);
-                              },
+                          caixaDialogo(index);
+                        },
+                        icon: Icon(
+                          Icons.edit,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          ctrl.removerItem(index);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Item removido com sucesso!',
+                              ),
                             ),
-                            Text('Cadastrar Produto'),
-
-                          IconButton(
-                              icon: const Icon(Icons.list),
-                              iconSize: 100,
-
-                              //tooltip: 'teste',
-                              onPressed: () { 
-                                Navigator.pushNamed(context, 'lista_produtos');
-                              },
-                            ),
-                            Text('Listar Produtos em Estoque'),
-
-                          IconButton(
-                              icon: const Icon(Icons.edit_document),
-                              iconSize: 100,
-
-                              //tooltip: 'teste',
-                              onPressed: () {
-                                Navigator.pushNamed(context, 'edita_produtos');
-                              },
-                            ),
-                            Text('Editar Estoque'),
-
-                    
-                  
-
-                    
-
-              ],
+                          );
+                        },
+                        icon: Icon(Icons.delete_outline),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-              
+          );
+        },
+      ),
+    ),
+/*
+        SizedBox(
+      child: ListView.builder(
+        itemCount: ctrl.produtos.length,
+        itemBuilder: (context, index) {
+          final item = ctrl.produtos[index];
+
+          return SizedBox(
+            child: Card(
+              child: ListTile(
+                title: Text(
+                  '${item.nome} x${item.quantidade}',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  'R\$ ${item.preco.toStringAsFixed(2)}',
+                ),
+                trailing: SizedBox(
+                  width: 80,
+                                  ),
+              ),
             ),
-              ],
-            
-  
-            ),
-
-
-
-
-
-
-
-            ),
-        ),
+          );
+        },
+      ),
+    )
+*/
+      ),
     );
   }
-
   caixaDialogo(index) {
     return showDialog(
       context: context,
@@ -124,7 +151,7 @@ class _MenuViewState extends State<MenuView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Adicionar item',
+                    'Alterar item',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -255,8 +282,10 @@ class _MenuViewState extends State<MenuView> {
                             );
                           } else {
                             String msg = '';
-                              ctrl.adicionarItem();
-                              msg = 'Item adicionado com sucesso!';
+
+                              ctrl.alterarItem(index);
+                              msg = 'Item alterado com sucesso!';
+
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(msg)),
@@ -289,10 +318,5 @@ class _MenuViewState extends State<MenuView> {
       },
     );
   }
-
-
-
-
-
 
 }
