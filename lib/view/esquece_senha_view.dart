@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:app_projeto/view/components/mensagem.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 
@@ -86,7 +88,10 @@ class _EsquecesenhaViewState extends State<EsquecesenhaView> {
                                 child: const Text('Não'),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.pop(context, 'Sim'),
+                                onPressed: () {
+                                  esqueceuSenha(context, txtEmail.text);
+                                  Navigator.pop(context, 'Sim');
+  },
                                 child: const Text('Sim'),
                               ),
                             ],
@@ -111,4 +116,59 @@ class _EsquecesenhaViewState extends State<EsquecesenhaView> {
         ),
     );
   }
+
+
+esqueceuSenha(context, String email) async {
+  if (email.isEmpty) {
+    if (!mounted) return;
+    erro(context, 'Informe o e-mail para recuperar a senha.');
+    return;
+  }
+
+  try {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+    if (!mounted) return;
+    sucesso(context, 'E-mail enviado com sucesso.');
+
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
+
+    // Mapeia mensagens amigáveis
+    switch (e.code) {
+      case 'invalid-email':
+        erro(context, 'E-mail inválido.');
+        break;
+
+      case 'user-not-found':
+        erro(context, 'Nenhum usuário encontrado com este e-mail.');
+        break;
+
+      default:
+        erro(context, 'Erro: ${e.message}');
+        break;
+    }
+
+  } catch (e) {
+    if (!mounted) return;
+    erro(context, 'Erro inesperado: $e');
+  }
+}
+/*
+esqueceuSenha(context, String email) {
+  if (email.isNotEmpty) {
+    FirebaseAuth.instance.sendPasswordResetEmail(
+      email: email,
+    );
+    sucesso(context, 'E-mail enviado com sucesso.');
+  } else {
+    erro(context, 'Informe o e-mail para recuperar a senha.');
+  }
+
+  //Navigator.pop(context);
+}
+*/
+
+
+
 }

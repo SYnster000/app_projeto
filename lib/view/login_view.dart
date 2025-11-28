@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:app_projeto/view/components/mensagem.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 
@@ -155,13 +157,16 @@ class _LoginViewState extends State<LoginView> {
                     minimumSize: Size(140, 40)
                   ),
                   onPressed: () {
-                    Navigator.pushNamed(context, 'menu');
+                    login(context, txtEmail.text, txtSenha.text);
+                    //Navigator.pushNamed(context, 'menu');
+                    /*
                     ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text("Seja Bem Vindo(a)!!!"),
                             duration: Duration(seconds: 3),
                           ),
                         );
+                        */
                   }, 
                   child: Text('Entrar'),
                   ),
@@ -190,4 +195,32 @@ class _LoginViewState extends State<LoginView> {
           ),
         );
   }
+
+login(context, email, senha) {
+  FirebaseAuth.instance
+      .signInWithEmailAndPassword(email: email, password: senha)
+      .then((res) {
+    sucesso(context, 'Usuário autenticado com sucesso.');
+    //Navigator.pushNamed(context, 'menu');
+    Navigator.pushReplacementNamed(context, 'menu');
+  }).catchError((e) {
+    switch (e.code) {
+      case 'invalid-email':
+        erro(context, 'O formato do email é inválido.');  break;
+      case 'user-not-found':
+        erro(context, 'Usuário não encontrado.'); break;
+      case 'wrong-password':
+        erro(context, 'Senha incorreta.');        break;
+      case 'invalid-credential':
+        erro(context, 'Credencial Inválida.');        break;
+      case 'missing-password':
+        erro(context, 'Senha incorreta.');        break;
+      default:
+        erro(context, e.code.toString());
+    }
+  });
+}
+
+
+
 }

@@ -13,8 +13,11 @@ class CadastroView extends StatefulWidget {
 class _CadastroViewState extends State<CadastroView> {
 
   var txtNome = TextEditingController();
+  var txtSobrenome = TextEditingController();
+  var txtCidade = TextEditingController();
   var txtEmail = TextEditingController();
   var txtSenha = TextEditingController();
+  
 
 
   @override
@@ -66,6 +69,41 @@ class _CadastroViewState extends State<CadastroView> {
                       height: 20,
                     ),
 
+                  TextField(
+                    controller: txtSobrenome,
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Sobrenome',
+                      hintText: 'Digite seu sobrenome',
+                      //hintStyle: TextStyle(color: Colors.white),
+
+                    ),
+                    ),
+
+                    SizedBox(
+                      height: 20,
+                    ),
+
+                  TextField(
+                    controller: txtCidade,
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Cidade',
+                      hintText: 'Digite sua cidade',
+                      //hintStyle: TextStyle(color: Colors.white),
+
+                    ),
+                    ),
+
+                    SizedBox(
+                      height: 20,
+                    ),
 
                    TextField(
                     controller: txtEmail,
