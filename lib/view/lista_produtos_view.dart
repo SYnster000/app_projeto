@@ -43,29 +43,50 @@ class ListaProdutosView extends StatefulWidget {
         child:
 
         SizedBox(
-      child: ListView.builder(
-        itemCount: ctrl.produtos.length,
-        itemBuilder: (context, index) {
-          final item = ctrl.produtos[index];
+      child: StreamBuilder<QuerySnapshot>(
+  stream: FirebaseFirestore.instance.collection('produtos').snapshots(),
+  builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    
+    if (snapshot.hasError) {
+      return Text('Erro ao carregar dados: ${snapshot.error}');
+    }
 
-          return SizedBox(
-            child: Card(
-              child: ListTile(
-                title: Text(
-                  '${item.nome} x${item.quantidade}',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  'R\$ ${item.preco.toStringAsFixed(2)}',
-                ),
-                trailing: SizedBox(
-                  width: 80,
-                                  ),
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    // Lista final de documentos
+    final docs = snapshot.data!.docs;
+
+    return ListView.builder(
+      itemCount: docs.length,
+      itemBuilder: (context, index) {
+        final data = docs[index].data() as Map<String, dynamic>;
+
+        final nome = data['nome'] ?? '';
+        final preco = (data['preco'] as num).toDouble();
+        final quantidade = data['quantidade'] ?? 0;
+
+        return SizedBox(
+          child: Card(
+            child: ListTile(
+              title: Text(
+                '$nome x$quantidade',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                'R\$ ${preco.toStringAsFixed(2)}',
+              ),
+              trailing: SizedBox(
+                width: 80,
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
+    );
+  },
+),
     )
       ),
     );
