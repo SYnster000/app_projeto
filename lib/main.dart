@@ -29,7 +29,7 @@ void main() async {
   //iniciar a execução do App
   runApp(
     DevicePreview(
-      enabled: true,
+      enabled: false,
       builder: (context) => MaterialApp(
         
         theme: ThemeData(
