@@ -80,11 +80,6 @@ class LoginController extends ChangeNotifier {
   
   }
 
-  //
-  // ESQUECEU A SENHA
-  // Envia uma mensagem de email para recuperação de senha para
-  // um conta de email válida
-  //
   void esqueceuSenha(context) {
     auth
         .sendPasswordResetEmail(email: txtEmailEsqueceuSenha.text)
@@ -108,9 +103,7 @@ class LoginController extends ChangeNotifier {
     txtEmailEsqueceuSenha.clear();
   }
 
-  //
-  // LOGOUT
-  //
+
   logout(context) {
     auth.signOut().then((resultado) {
       Navigator.of(context).pushReplacementNamed('login');
@@ -119,17 +112,13 @@ class LoginController extends ChangeNotifier {
     });
   }
 
-  //
-  // ID do Usuário Logado
-  //
+
   String? idUsuario() {
     final user = FirebaseAuth.instance.currentUser;
     return user?.uid;
   }
 
-  //
-  // NOME do Usuário Logado
-  //
+
   Future<String> usuarioLogado() async {
     var nome = "";
     await FirebaseFirestore.instance

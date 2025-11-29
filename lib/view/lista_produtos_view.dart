@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../controller/produto_controller.dart';
@@ -11,6 +12,9 @@ class ListaProdutosView extends StatefulWidget {
 
   class _ListaProdutosViewState extends State<ListaProdutosView> {
   final ctrl = GetIt.I.get<ProdutoController>();
+
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  late final CollectionReference dados = firestore.collection('produtos');
 
  @override
   void initState() {

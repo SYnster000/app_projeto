@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../model/produto_model.dart';
@@ -25,20 +26,37 @@ class ProdutoController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void adicionarItem() {
-    String nome = txtNome.text;
-    double preco = double.tryParse(txtPreco.text) ?? 0.0;
-    int quantidade = int.tryParse(txtQuantidade.text) ?? 0;
+void adicionarItem() async {
+  String nome = txtNome.text;
+  double preco = double.tryParse(txtPreco.text) ?? 0.0;
+  int quantidade = int.tryParse(txtQuantidade.text) ?? 0;
 
+  // Cria o objeto
+  Produto produto = Produto(
+    nome: nome,
+    preco: preco,
+    quantidade: quantidade,
+  );
 
+  try {
+    // Envia para o Firestore
+    await FirebaseFirestore.instance.collection('produtos').add(
+          produto.toJson(),
+        );
 
-    _produtos.add(Produto(nome: nome, preco: preco, quantidade: quantidade));
+    // Adiciona na lista local
+    _produtos.add(produto);
 
+    // Limpa inputs
     txtNome.clear();
     txtPreco.clear();
+    txtQuantidade.clear();
 
     notifyListeners();
+  } catch (e) {
+    print('Erro ao adicionar item: $e');
   }
+}
 
   void alterarItem(index){
     String nome = txtNome.text;
