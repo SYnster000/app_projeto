@@ -1,5 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:app_projeto/view/components/mensagem.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 
@@ -158,7 +161,9 @@ class _CadastroViewState extends State<CadastroView> {
                                 child: const Text('Não'),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.pop(context, 'Sim'),
+                                onPressed: () { 
+                                  criarConta(context, txtNome.text, txtEmail.text, txtSenha.text);
+                                },
                                 child: const Text('Sim'),
                               ),
                             ],
@@ -183,4 +188,33 @@ class _CadastroViewState extends State<CadastroView> {
         ),
     );
   }
+
+criarConta(context, String nome, String email, String senha) {
+    FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: senha)
+        .then((res) {
+      //Armazenar informações adicionais no Firestore
+      FirebaseFirestore.instance.collection('usuarios').add({
+        "uid": res.user!.uid.toString(),
+        "nome": nome,
+      });
+      sucesso(context, 'Usuário criado com sucesso.');
+      Navigator.pop(context);
+    }).catchError((e) {
+      switch (e.code) {
+        case 'email-already-in-use':
+          erro(context, 'O email já foi cadastrado.'); break;
+        case 'invalid-email':
+          erro(context, 'O email é inválido.'); break;
+        default:
+          erro(context, e.code.toString());
+      }
+    });
+  }
+
+
+
+
+
+
 }

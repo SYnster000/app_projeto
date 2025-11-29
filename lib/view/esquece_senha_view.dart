@@ -91,7 +91,7 @@ class _EsquecesenhaViewState extends State<EsquecesenhaView> {
                                 onPressed: () {
                                   esqueceuSenha(context, txtEmail.text);
                                   Navigator.pop(context, 'Sim');
-  },
+                                },
                                 child: const Text('Sim'),
                               ),
                             ],
@@ -117,7 +117,7 @@ class _EsquecesenhaViewState extends State<EsquecesenhaView> {
     );
   }
 
-
+/*
 esqueceuSenha(context, String email) async {
   if (email.isEmpty) {
     if (!mounted) return;
@@ -154,12 +154,35 @@ esqueceuSenha(context, String email) async {
     erro(context, 'Erro inesperado: $e');
   }
 }
-/*
+*/
+
 esqueceuSenha(context, String email) {
   if (email.isNotEmpty) {
-    FirebaseAuth.instance.sendPasswordResetEmail(
-      email: email,
-    );
+    FirebaseAuth.instance
+    .sendPasswordResetEmail(email: email)
+    .then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('E-mail de recuperação enviado!')),
+      );
+    })
+    .catchError((error) {
+      if (error is FirebaseAuthException) {
+        String msg = 'Erro ao enviar e-mail';
+
+        switch (error.code) {
+          case 'user-not-found':
+            msg = 'Nenhuma conta encontrada com esse e-mail.';
+            break;
+          case 'invalid-email':
+            msg = 'E-mail inválido.';
+            break;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      }
+    });
     sucesso(context, 'E-mail enviado com sucesso.');
   } else {
     erro(context, 'Informe o e-mail para recuperar a senha.');
@@ -167,7 +190,7 @@ esqueceuSenha(context, String email) {
 
   //Navigator.pop(context);
 }
-*/
+
 
 
 

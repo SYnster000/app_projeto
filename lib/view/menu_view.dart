@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:app_projeto/controller/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../controller/produto_controller.dart';
+
 
 
 class MenuView extends StatefulWidget {
@@ -13,18 +15,62 @@ class MenuView extends StatefulWidget {
 }
 
 class _MenuViewState extends State<MenuView> {
+
+
+
   final ctrl = GetIt.I.get<ProdutoController>();
+  final ctrlLogin = GetIt.I.get<LoginController>();
+
+
+  @override
+  void initState() {
+    super.initState();
+    ctrl.addListener(() => setState(() {}));
+    ctrlLogin.addListener(() => setState(() {}));
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Menu',
-        style: TextStyle(fontSize: 24, color: Colors.white),
+        title: Row(
+          children: [
+            Expanded(child: Text('Menu',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                  )
+                  ),
+            FutureBuilder<String>(
+              future: LoginController().usuarioLogado(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        textStyle: TextStyle(fontSize: 12),
+                      ),
+                      onPressed: () {
+                        LoginController().logout(context);
+                        Navigator.pushReplacementNamed(context, 'login');
+                      },
+                      icon: Icon(Icons.exit_to_app, size: 14),
+                      label: Text(snapshot.data.toString()),
+                    ),
+                  );
+                }
+                return Text('');
+              },
+            ),
+          ],
         ),
-      
         centerTitle: true,
         backgroundColor: Colors.grey.shade600,
       ),
+
         body: Center(
             child: Container(
               width: double.infinity,

@@ -1,3 +1,4 @@
+import 'package:app_projeto/controller/login_controller.dart';
 import 'package:app_projeto/view/edita_produtos_view.dart';
 import 'package:app_projeto/view/esquece_senha_view.dart';
 import 'package:app_projeto/view/lista_produtos_view.dart';
@@ -23,6 +24,7 @@ void main() async {
   );
 
   g.registerSingleton<ProdutoController>(ProdutoController());
+  g.registerSingleton<LoginController>(LoginController());
 
   //iniciar a execução do App
   runApp(
