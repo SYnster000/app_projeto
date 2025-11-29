@@ -64,10 +64,9 @@ class _ListaProdutosViewState extends State<ListaProdutosView> {
                 prefixIcon: Icon(Icons.search),
                 labelText: 'Pesquisar produto',
                 labelStyle: TextStyle(
-                                    color: Colors.black, // 🔵 cor do label
+                  color: Colors.black, // cor do label
                 ),
                 border: OutlineInputBorder(),
-                
               ),
             ),
 
@@ -94,7 +93,6 @@ class _ListaProdutosViewState extends State<ListaProdutosView> {
                       if (value == null) return;
                       setState(() {
                         orderBy = value;
-                        // atualiza stream com a nova ordenação
                         streamProdutos = buscarProdutos(searchCtrl.text.trim(), orderBy);
                       });
                     },
@@ -119,30 +117,32 @@ class _ListaProdutosViewState extends State<ListaProdutosView> {
                     return Center(child: CircularProgressIndicator());
                   }
 
-                  // Pegamos os docs e trabalhamos sobre uma cópia (toList)
+                  // Documentos recuperados
                   final docsOrig = snapshot.data!.docs;
-                  final docs = docsOrig.toList();
 
-                  // Se existe filtro (pesquisa) e a ordenação escolhida NÃO é 'nome',
-                  // temos que ordenar localmente pelos valores numéricos ou texto do campo escolhido.
-                  final filtroAtivo = searchCtrl.text.trim().isNotEmpty;
-                  if (filtroAtivo && orderBy != 'nome') {
+                  // 🔍 Case-insensitive local filter
+                  final filtro = searchCtrl.text.trim().toLowerCase();
+
+                  final docs = docsOrig.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>? ?? {};
+                    final nome = data['nome']?.toString().toLowerCase() ?? '';
+                    return nome.contains(filtro);
+                  }).toList();
+
+                  // 🔽 Ordenação adicional local se necessário
+                  if (filtro.isNotEmpty && orderBy != 'nome') {
                     docs.sort((a, b) {
-                      final Map<String, dynamic> da = a.data() as Map<String, dynamic>? ?? {};
-                      final Map<String, dynamic> db = b.data() as Map<String, dynamic>? ?? {};
+                      final da = a.data() as Map<String, dynamic>? ?? {};
+                      final db = b.data() as Map<String, dynamic>? ?? {};
 
                       final va = da[orderBy];
                       final vb = db[orderBy];
 
-                      // tratar numéricos
                       if (va is num && vb is num) {
                         return va.compareTo(vb);
                       }
 
-                      // tratar strings (ou nulls convertidos pra string)
-                      final sa = va?.toString() ?? '';
-                      final sb = vb?.toString() ?? '';
-                      return sa.compareTo(sb);
+                      return (va?.toString() ?? '').compareTo(vb?.toString() ?? '');
                     });
                   }
 
@@ -186,17 +186,10 @@ class _ListaProdutosViewState extends State<ListaProdutosView> {
   // 🔎 BUSCA + ORDENACAO
   Stream<QuerySnapshot> buscarProdutos(String filtro, String orderField) {
     if (filtro.isEmpty) {
-      // sem filtro: deixamos o servidor ordenar pelo campo pedido
-      // (se não houver índice, Firestore pode pedir criação de índice)
       return dados.orderBy(orderField).snapshots();
     }
 
-    // com filtro: só podemos usar startAt/endAt no campo que ordenamos.
-    // então: filtramos por 'nome' (startAt) e, se necessário, ordenamos localmente no builder.
-    return dados
-        .orderBy('nome')
-        .startAt([filtro])
-        .endAt(['$filtro\uf8ff'])
-        .snapshots();
+    // 🔥 Carrega tudo ordenado por nome (não filtra aqui)
+    return dados.orderBy('nome').snapshots();
   }
 }
