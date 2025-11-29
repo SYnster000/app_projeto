@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:app_projeto/controller/api_controller.dart';
 import 'package:app_projeto/controller/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -20,6 +21,8 @@ class _MenuViewState extends State<MenuView> {
 
   final ctrl = GetIt.I.get<ProdutoController>();
   final ctrlLogin = GetIt.I.get<LoginController>();
+
+  final url = Uri.parse('https://fakestoreapi.com/products');
 
 
   @override
@@ -119,6 +122,18 @@ class _MenuViewState extends State<MenuView> {
                               },
                             ),
                             Text('Editar Estoque'),
+
+
+                          IconButton(
+                              icon: const Icon(Icons.api),
+                              iconSize: 100,
+
+                              //tooltip: 'teste',
+                                onPressed: () async {
+                                  await importarProdutosFakeStore(context);
+                                },
+                            ),
+                            Text('Popular Estoque com API'),
 
                     
                   

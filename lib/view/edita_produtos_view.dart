@@ -354,4 +354,18 @@ class _EditaProdutosViewState extends State<EditaProdutosView> {
 }
 
 
+Stream<QuerySnapshot> buscarProdutos(String filtro) {
+  if (filtro.isEmpty) {
+    return dados.orderBy('nome').snapshots();
+  }
+
+  return dados
+      .orderBy('nome')
+      .startAt([filtro])
+      .endAt(['$filtro\uf8ff'])
+      .snapshots();
+}
+
+
+
 }

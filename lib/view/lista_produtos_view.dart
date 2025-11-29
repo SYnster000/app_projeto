@@ -10,85 +10,193 @@ class ListaProdutosView extends StatefulWidget {
   State<ListaProdutosView> createState() => _ListaProdutosViewState();
 }
 
-  class _ListaProdutosViewState extends State<ListaProdutosView> {
+class _ListaProdutosViewState extends State<ListaProdutosView> {
   final ctrl = GetIt.I.get<ProdutoController>();
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   late final CollectionReference dados = firestore.collection('produtos');
 
- @override
+  final TextEditingController searchCtrl = TextEditingController();
+
+  // Ordenação escolhida pelo usuário
+  String orderBy = 'nome'; // valor padrão
+
+  Stream<QuerySnapshot> streamProdutos = const Stream.empty();
+
+  @override
   void initState() {
     super.initState();
     ctrl.addListener(() => setState(() {}));
+
+    streamProdutos = buscarProdutos('', orderBy);
+
+    searchCtrl.addListener(() {
+      setState(() {
+        streamProdutos = buscarProdutos(searchCtrl.text.trim(), orderBy);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchCtrl.removeListener(() {});
+    searchCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Produtos',
-          style: TextStyle(fontSize: 24, color: Colors.white),
-          
-        ),
+        title: Text('Produtos', style: TextStyle(fontSize: 24, color: Colors.white)),
         centerTitle: true,
         backgroundColor: Colors.grey.shade600,
-
       ),
-      //
-      // BODY
-      //
       body: Padding(
-        padding: EdgeInsets.all(30),
-        child:
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          children: [
 
-        SizedBox(
-      child: StreamBuilder<QuerySnapshot>(
-  stream: FirebaseFirestore.instance.collection('produtos').snapshots(),
-  builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-    
-    if (snapshot.hasError) {
-      return Text('Erro ao carregar dados: ${snapshot.error}');
-    }
-
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    // Lista final de documentos
-    final docs = snapshot.data!.docs;
-
-    return ListView.builder(
-      itemCount: docs.length,
-      itemBuilder: (context, index) {
-        final data = docs[index].data() as Map<String, dynamic>;
-
-        final nome = data['nome'] ?? '';
-        final preco = (data['preco'] as num).toDouble();
-        final quantidade = data['quantidade'] ?? 0;
-
-        return SizedBox(
-          child: Card(
-            child: ListTile(
-              title: Text(
-                '$nome x$quantidade',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                'R\$ ${preco.toStringAsFixed(2)}',
-              ),
-              trailing: SizedBox(
-                width: 80,
+            // 🔍 Campo de pesquisa
+            TextField(
+              controller: searchCtrl,
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.search),
+                labelText: 'Pesquisar produto',
+                labelStyle: TextStyle(
+                                    color: Colors.black, // 🔵 cor do label
+                ),
+                border: OutlineInputBorder(),
+                
               ),
             ),
-          ),
-        );
-      },
-    );
-  },
-),
-    )
+
+            SizedBox(height: 20),
+
+            // 🔽 Dropdown para ordenação
+            Row(
+              children: [
+                Text("Ordenar por: ", style: TextStyle(fontSize: 16)),
+                SizedBox(width: 20),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: orderBy,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'nome', child: Text("Nome (A-Z)")),
+                      DropdownMenuItem(value: 'preco', child: Text("Valor (Preço)")),
+                      DropdownMenuItem(value: 'quantidade', child: Text("Quantidade")),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        orderBy = value;
+                        // atualiza stream com a nova ordenação
+                        streamProdutos = buscarProdutos(searchCtrl.text.trim(), orderBy);
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 20),
+
+            // LISTA
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: streamProdutos,
+                builder: (context, snapshot) {
+                  
+                  if (snapshot.hasError) {
+                    return Text('Erro ao carregar: ${snapshot.error}');
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  // Pegamos os docs e trabalhamos sobre uma cópia (toList)
+                  final docsOrig = snapshot.data!.docs;
+                  final docs = docsOrig.toList();
+
+                  // Se existe filtro (pesquisa) e a ordenação escolhida NÃO é 'nome',
+                  // temos que ordenar localmente pelos valores numéricos ou texto do campo escolhido.
+                  final filtroAtivo = searchCtrl.text.trim().isNotEmpty;
+                  if (filtroAtivo && orderBy != 'nome') {
+                    docs.sort((a, b) {
+                      final Map<String, dynamic> da = a.data() as Map<String, dynamic>? ?? {};
+                      final Map<String, dynamic> db = b.data() as Map<String, dynamic>? ?? {};
+
+                      final va = da[orderBy];
+                      final vb = db[orderBy];
+
+                      // tratar numéricos
+                      if (va is num && vb is num) {
+                        return va.compareTo(vb);
+                      }
+
+                      // tratar strings (ou nulls convertidos pra string)
+                      final sa = va?.toString() ?? '';
+                      final sb = vb?.toString() ?? '';
+                      return sa.compareTo(sb);
+                    });
+                  }
+
+                  if (docs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'Nenhum produto encontrado',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      final data = docs[index].data() as Map<String, dynamic>?;
+
+                      if (data == null) return SizedBox();
+
+                      final nome = data['nome']?.toString() ?? '';
+                      final preco = (data['preco'] is num) ? (data['preco'] as num).toDouble() : 0.0;
+                      final quantidade = (data['quantidade'] is num) ? data['quantidade'] : 0;
+
+                      return Card(
+                        child: ListTile(
+                          title: Text('$nome x$quantidade', style: TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text('R\$ ${preco.toStringAsFixed(2)}'),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  // 🔎 BUSCA + ORDENACAO
+  Stream<QuerySnapshot> buscarProdutos(String filtro, String orderField) {
+    if (filtro.isEmpty) {
+      // sem filtro: deixamos o servidor ordenar pelo campo pedido
+      // (se não houver índice, Firestore pode pedir criação de índice)
+      return dados.orderBy(orderField).snapshots();
+    }
+
+    // com filtro: só podemos usar startAt/endAt no campo que ordenamos.
+    // então: filtramos por 'nome' (startAt) e, se necessário, ordenamos localmente no builder.
+    return dados
+        .orderBy('nome')
+        .startAt([filtro])
+        .endAt(['$filtro\uf8ff'])
+        .snapshots();
   }
 }
